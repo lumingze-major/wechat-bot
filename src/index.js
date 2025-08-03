@@ -15,7 +15,27 @@ class WechatBot {
   constructor() {
     this.bot = WechatyBuilder.build({
       name: config.bot.name,
-      puppet: 'wechaty-puppet-wechat'
+      puppet: 'wechaty-puppet-wechat',
+      puppetOptions: {
+        launchOptions: {
+          executablePath: '/usr/bin/google-chrome',
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
+          ]
+        }
+      }
     });
     
     // 初始化豆包服务
@@ -38,7 +58,7 @@ class WechatBot {
 
   setupHealthServer() {
     this.app = express();
-    this.healthPort = process.env.PORT || 3000;
+    this.healthPort = process.env.PORT || 3001;
     
     // 健康检查端点
     this.app.get('/health', (req, res) => {
@@ -61,8 +81,8 @@ class WechatBot {
     });
     
     // 启动健康检查服务器
-    this.healthServer = this.app.listen(this.healthPort, () => {
-      logger.info(`健康检查服务器运行在端口 ${this.healthPort}`);
+    this.healthServer = this.app.listen(3001, () => {
+      logger.info(`健康检查服务器运行在端口 3001`);
     });
   }
 
@@ -135,7 +155,8 @@ class WechatBot {
       logger.info('微信机器人启动成功');
     } catch (error) {
       logger.error('机器人启动失败:', error);
-      process.exit(1);
+      logger.info('健康检查服务器将继续运行');
+      // 不退出进程，让健康检查服务器继续运行
     }
   }
 
