@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: wechat-bot
+    env: node
+    plan: free
+    region: singapore  # 选择新加坡区域，延迟更低
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+    # 自动部署设置
+    autoDeploy: true
+    # 构建过滤器
+    buildFilter:
+      paths:
+        - src/**
+        - package.json
+        - package-lock.json
