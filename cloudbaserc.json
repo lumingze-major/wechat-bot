@@ -1,0 +1,16 @@
+{
+  "envId": "{{env.TCB_ENVID}}",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "wechat-bot",
+      "timeout": 60,
+      "envVariables": {
+        "NODE_ENV": "production"
+      },
+      "runtime": "Nodejs16.13",
+      "memorySize": 256,
+      "handler": "index.main"
+    }
+  ]
+}
