@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
 });
 
 // 启动 HTTP 服务器
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`微信机器人云函数服务启动，端口: ${PORT}`);
 });
