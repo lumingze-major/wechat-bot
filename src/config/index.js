@@ -9,6 +9,18 @@ module.exports = {
     dataDir: process.env.DATA_DIR || 'data'
   },
 
+  // Puppet 配置
+  puppet: {
+    type: process.env.PUPPET_TYPE || 'wechaty-puppet-wechat', // 可选: wechaty-puppet-wechat, wechaty-puppet-service
+    options: {
+      // wechaty-puppet-service 配置
+      token: process.env.PUPPET_SERVICE_TOKEN || '',
+      endpoint: process.env.PUPPET_SERVICE_ENDPOINT || '',
+      // wechaty-puppet-wechat 配置
+      uos: process.env.PUPPET_WECHAT_UOS === 'true' // 启用UOS协议可能更稳定
+    }
+  },
+
   // 豆包服务配置
   doubao: {
     apiKey: process.env.DOUBAO_API_KEY || '',

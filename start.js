@@ -53,12 +53,12 @@ class BotStarter {
     logger.info(`   机器人名称: ${config.bot.name}`);
     logger.info(`   日志级别: ${config.log.level}`);
     logger.info(`   功能状态:`);
-    logger.info(`     - 智能对话: ${config.features.chat ? '✅' : '❌'}`);
+    logger.info(`     - 智能对话: ${config.doubao.apiKey ? '✅' : '❌'}`);
     logger.info(`     - 知识问答: ${config.features.knowledge ? '✅' : '❌'}`);
     logger.info(`     - 娱乐功能: ${config.features.entertainment ? '✅' : '❌'}`);
     logger.info(`     - 实用工具: ${config.features.tools ? '✅' : '❌'}`);
-    logger.info(`     - 群组管理: ${config.features.groupManagement ? '✅' : '❌'}`);
-    logger.info(`   AI服务: ${config.ai.baseURL ? '已配置' : '未配置'}`);
+    logger.info(`     - 群组管理: ${config.features.groupManage ? '✅' : '❌'}`);
+    logger.info(`   AI服务: ${config.doubao.baseUrl ? '已配置' : '未配置'}`);
     logger.info('');
   }
 
@@ -193,7 +193,7 @@ function checkNodeVersion() {
 
 // 检查环境变量
 function checkEnvironment() {
-  const requiredEnvVars = ['AI_API_KEY'];
+  const requiredEnvVars = ['DOUBAO_API_KEY'];
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {

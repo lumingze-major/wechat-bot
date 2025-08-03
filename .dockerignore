@@ -1,0 +1,52 @@
+# 依赖目录
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 运行时文件
+logs
+*.log
+data
+*.tmp
+*.temp
+
+# 开发文件
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 测试
+coverage
+.nyc_output
+
+# 文档
+*.md
+!README.md
+
+# 部署配置（保留需要的）
+!Dockerfile
+!.dockerignore
+!cloudbaserc.json
+
+# 其他
+.npm
+.eslintcache
+.cache

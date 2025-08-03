@@ -13,30 +13,38 @@ const ToolService = require('./services/toolService');
 
 class WechatBot {
   constructor() {
-    this.bot = WechatyBuilder.build({
+    console.log('🚀 初始化微信机器人...');
+    
+    // 构建puppet配置
+    const puppetConfig = {
       name: config.bot.name,
-      puppet: 'wechaty-puppet-wechat',
-      puppetOptions: {
-        launchOptions: {
-          executablePath: '/usr/bin/google-chrome',
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu',
-            '--disable-web-security',
-            '--disable-features=VizDisplayCompositor',
-            '--disable-background-timer-throttling',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding'
-          ]
-        }
+      puppet: config.puppet.type
+    };
+    
+    // 根据puppet类型添加特定配置
+    if (config.puppet.type === 'wechaty-puppet-service') {
+      if (config.puppet.options.token) {
+        puppetConfig.puppetOptions = {
+          token: config.puppet.options.token,
+          endpoint: config.puppet.options.endpoint
+        };
       }
-    });
+    } else if (config.puppet.type === 'wechaty-puppet-wechat') {
+      if (config.puppet.options.uos) {
+        puppetConfig.puppetOptions = {
+          uos: config.puppet.options.uos
+        };
+      }
+    }
+    
+    console.log(`📡 使用 Puppet: ${config.puppet.type}`);
+    this.bot = WechatyBuilder.build(puppetConfig);
+    
+    console.log('✅ 机器人实例创建成功');
+  }
+  
+  async initializeServices() {
+    console.log('📦 初始化服务...');
     
     // 初始化豆包服务
     this.doubaoService = new DoubaoService();
@@ -46,14 +54,21 @@ class WechatBot {
     this.toolService = new ToolService(this.doubaoService);
     
     // 初始化处理器
-     this.messageHandler = new MessageHandler(this.doubaoService, this.groupService, this.toolService);
+    this.messageHandler = new MessageHandler(this.doubaoService, this.groupService, this.toolService);
     this.contactHandler = new ContactHandler(this.doubaoService);
     this.roomHandler = new RoomHandler(this.doubaoService, this.groupService);
     this.schedulerService = new SchedulerService(this.bot, this.doubaoService);
     
-    // 初始化健康检查服务器
-    this.setupHealthServer();
-    this.setupEventHandlers();
+    console.log('✅ 服务初始化完成');
+    
+    // 只在第一次初始化时设置健康检查服务器和事件处理器
+    if (!this.healthServer) {
+      this.setupHealthServer();
+    }
+    if (!this.eventsSetup) {
+      this.setupEventHandlers();
+      this.eventsSetup = true;
+    }
   }
 
   setupHealthServer() {
@@ -80,9 +95,12 @@ class WechatBot {
       });
     });
     
-    // 启动健康检查服务器
-    this.healthServer = this.app.listen(3001, () => {
-      logger.info(`健康检查服务器运行在端口 3001`);
+    // 启动健康检查服务器，使用动态端口避免冲突
+    const port = process.env.HEALTH_PORT || 0; // 0表示系统自动分配可用端口
+    this.healthServer = this.app.listen(port, () => {
+      const actualPort = this.healthServer.address().port;
+      logger.info(`健康检查服务器运行在端口 ${actualPort}`);
+      console.log(`]: 健康检查服务器运行在端口 ${actualPort}`);
     });
   }
 
@@ -151,9 +169,15 @@ class WechatBot {
 
   async start() {
     try {
+      // 初始化服务
+      await this.initializeServices();
+      
+      console.log('🔄 启动微信机器人...');
       await this.bot.start();
+      console.log('✅ 微信机器人启动成功');
       logger.info('微信机器人启动成功');
     } catch (error) {
+      console.error('❌ 机器人启动失败:', error);
       logger.error('机器人启动失败:', error);
       logger.info('健康检查服务器将继续运行');
       // 不退出进程，让健康检查服务器继续运行
@@ -179,21 +203,6 @@ class WechatBot {
   }
 }
 
-// 启动机器人
-const bot = new WechatBot();
-bot.start();
-
-// 优雅退出
-process.on('SIGINT', async () => {
-  logger.info('收到退出信号，正在关闭机器人...');
-  await bot.stop();
-  process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-  logger.info('收到终止信号，正在关闭机器人...');
-  await bot.stop();
-  process.exit(0);
-});
+// 注意：机器人启动由 start.js 管理，这里不自动启动
 
 module.exports = WechatBot;

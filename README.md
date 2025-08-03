@@ -39,33 +39,75 @@
 - 系统维护和统计报告
 - 自定义定时消息
 
-## 快速开始
+## 部署方式
 
-### 环境要求
-- Node.js 14.0.0+
-- 豆包 API 密钥
+### 🚀 腾讯云托管部署（推荐）
 
-### 安装配置
+详细部署指南请参考：[TENCENT_CLOUD_DEPLOY.md](./TENCENT_CLOUD_DEPLOY.md)
+
+**快速部署步骤：**
+
+1. **环境准备**
+   - 腾讯云账号
+   - 豆包 API 密钥
+   - Node.js 18.15+
+
+2. **配置环境变量**
+   ```bash
+   DOUBAO_API_KEY=your_api_key
+   DOUBAO_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+   DOUBAO_MODEL=your_model_endpoint
+   ```
+
+3. **部署命令**
+   ```bash
+   # 安装腾讯云CLI
+   npm install -g @cloudbase/cli
+   
+   # 登录并部署
+   cloudbase login
+   cloudbase functions:deploy wechat-bot
+   cloudbase hosting:deploy public
+   ```
+
+### 🐳 Docker容器部署
 
 ```bash
-# 克隆项目
+# 构建镜像
+docker build -t wechat-bot .
+
+# 运行容器
+docker run -d \
+  --name wechat-bot \
+  -p 8080:8080 \
+  -e DOUBAO_API_KEY=your_api_key \
+  -e DOUBAO_BASE_URL=your_base_url \
+  -e DOUBAO_MODEL=your_model \
+  wechat-bot
+```
+
+### 💻 本地开发部署
+
+**环境要求：**
+- Node.js 18.15+
+- 豆包 API 密钥
+
+**安装配置：**
+
+```bash
+# 1. 克隆项目
 git clone <repository-url>
 cd wechat-bot
 
-# 安装依赖
+# 2. 安装依赖
 npm install
 
-# 配置环境
+# 3. 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，设置必要的配置
+# 编辑 .env 文件，填入你的豆包 API 密钥
 
-# 运行测试
-node test.js
-
-# 启动机器人
+# 4. 启动机器人
 npm start
-# 或使用
-node start.js
 ```
 
 ### 环境变量配置

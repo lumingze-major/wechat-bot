@@ -2,17 +2,27 @@
   "name": "wechat-bot",
   "version": "1.0.0",
   "description": "功能全面的微信机器人",
-  "main": "index.js",
+  "main": "start.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon src/index.js",
-    "test": "jest"
+    "start": "node start.js",
+    "dev": "nodemon start.js",
+    "test": "jest",
+    "prod": "NODE_ENV=production node start.js",
+    "cloud": "node index.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
+    "dotenv": "^16.0.0",
     "express": "^4.21.2",
+    "file-box": "^1.4.15",
     "moment": "^2.29.4",
-    "openai": "^4.0.0"
+    "node-cron": "^4.2.1",
+    "openai": "^4.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "wechaty": "^1.20.2",
+    "wechaty-puppet-service": "^1.19.9",
+    "wechaty-puppet-wechat": "^1.11.12",
+    "winston": "^3.8.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",

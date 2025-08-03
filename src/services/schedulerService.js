@@ -458,6 +458,13 @@ class SchedulerService {
   }
 
   /**
+   * 停止服务（别名方法）
+   */
+  stop() {
+    this.stopAll();
+  }
+
+  /**
    * 销毁所有任务
    */
   destroy() {
