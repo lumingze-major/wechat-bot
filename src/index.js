@@ -14,6 +14,7 @@ const ToolService = require('./services/toolService');
 class WechatBot {
   constructor() {
     console.log('🚀 初始化微信机器人...');
+    this.isShuttingDown = false; // 添加关闭状态标志
     
     // 构建puppet配置
     const puppetConfig = {
@@ -29,12 +30,21 @@ class WechatBot {
           endpoint: config.puppet.options.endpoint
         };
       }
+    } else if (config.puppet.type === 'wechaty-puppet-wechat4u') {
+      puppetConfig.puppetOptions = {
+        uos: true
+      };
     } else if (config.puppet.type === 'wechaty-puppet-wechat') {
-      if (config.puppet.options.uos) {
-        puppetConfig.puppetOptions = {
-          uos: config.puppet.options.uos
-        };
-      }
+      puppetConfig.puppetOptions = {
+        uos: config.puppet.options.uos || false,
+        launchOptions: {
+          executablePath: '/usr/bin/google-chrome-stable',
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+          ]
+        }
+      };
     }
     
     console.log(`📡 使用 Puppet: ${config.puppet.type}`);
@@ -106,9 +116,9 @@ class WechatBot {
 
   setupEventHandlers() {
     this.bot
-      .on('scan', this.onScan)
+      .on('scan', this.onScan.bind(this))
       .on('login', this.onLogin.bind(this))
-      .on('logout', this.onLogout)
+      .on('logout', this.onLogout.bind(this))
       .on('message', this.onMessage.bind(this))
       .on('friendship', this.onFriendship.bind(this))
       .on('room-join', this.onRoomJoin.bind(this))
@@ -117,18 +127,27 @@ class WechatBot {
   }
 
   onScan(qrcode, status) {
+    console.log('\n=== 二维码登录 ===');
+    console.log(`状态: ${status}`);
+    console.log(`二维码URL: ${qrcode}`);
+    console.log('请扫描下方二维码:');
     qrTerm.generate(qrcode, { small: true });
     logger.info(`扫描二维码登录: ${status}`);
+    logger.info(`二维码URL: ${qrcode}`);
   }
 
   async onLogin(user) {
     logger.info(`机器人登录成功: ${user.name()}`);
-    await this.schedulerService.start();
+    if (this.schedulerService && typeof this.schedulerService.initialize === 'function') {
+      await this.schedulerService.initialize();
+    }
   }
 
   onLogout(user) {
     logger.info(`机器人退出登录: ${user.name()}`);
-    this.schedulerService.stop();
+    if (this.schedulerService && typeof this.schedulerService.stop === 'function' && !this.isShuttingDown) {
+      this.schedulerService.stop();
+    }
   }
 
   async onMessage(message) {
@@ -186,8 +205,11 @@ class WechatBot {
 
   async stop() {
     try {
+      this.isShuttingDown = true; // 设置关闭状态
       await this.bot.stop();
-      this.schedulerService.stop();
+      if (this.schedulerService && typeof this.schedulerService.stop === 'function') {
+        this.schedulerService.stop();
+      }
       
       // 关闭健康检查服务器
       if (this.healthServer) {

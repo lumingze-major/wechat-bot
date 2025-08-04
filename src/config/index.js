@@ -11,7 +11,7 @@ module.exports = {
 
   // Puppet 配置
   puppet: {
-    type: process.env.PUPPET_TYPE || 'wechaty-puppet-wechat', // 可选: wechaty-puppet-wechat, wechaty-puppet-service
+    type: process.env.PUPPET_TYPE || 'wechaty-puppet-wechat4u', // 可选: wechaty-puppet-wechat4u, wechaty-puppet-wechat, wechaty-puppet-service
     options: {
       // wechaty-puppet-service 配置
       token: process.env.PUPPET_SERVICE_TOKEN || '',
@@ -28,8 +28,8 @@ module.exports = {
     model: process.env.DOUBAO_MODEL || 'ep-20241230140956-8xqzm',
     maxTokens: parseInt(process.env.DOUBAO_MAX_TOKENS) || 2000,
     temperature: parseFloat(process.env.DOUBAO_TEMPERATURE) || 0.7,
-    visionModel: process.env.DOUBAO_VISION_MODEL || 'doubao-vision-pro-32k-241010',
-    videoModel: process.env.DOUBAO_VIDEO_MODEL || 'doubao-video-128k-241010'
+    visionModel: process.env.DOUBAO_VISION_MODEL || 'doubao-seed-1-6-250615',
+    videoModel: process.env.DOUBAO_VIDEO_MODEL || 'doubao-seed-1-6-250615'
   },
 
   // 功能开关
@@ -133,6 +133,34 @@ module.exports = {
       enabled: false,
       time: '07:30',
       rooms: []
+    }
+  },
+
+  // 调度器配置 (SchedulerService使用)
+  scheduler: {
+    dailyGreeting: {
+      enabled: false,
+      time: '09:00',
+      rooms: []
+    },
+    weatherReminder: {
+      enabled: false,
+      time: '08:00',
+      rooms: []
+    },
+    dailyQuote: {
+      enabled: false,
+      time: '10:00',
+      rooms: []
+    },
+    healthReminder: {
+      enabled: false,
+      time: '18:00',
+      rooms: []
+    },
+    adminNotification: {
+      enabled: false,
+      targetRooms: []
     }
   },
 

@@ -43,6 +43,19 @@ class MessageHandler {
     const messageType = message.type();
     const isRoom = !!room;
     const userId = contact.id;
+    const roomId = isRoom ? room.id : null;
+    
+    // 检查是否是一起聊模式的群聊
+    if (isRoom && messageType === message.constructor.Type.Text && this.groupChatRooms.has(roomId)) {
+      // 一起聊模式下，直接处理群聊消息，不需要@或关键词
+      const messageId = `${userId}_${Date.now()}`;
+      logger.info(`开始处理一起聊消息 [${messageId}] 来自用户: ${contact.name()}`);
+      
+      this.processMessageAsync(message, messageId).catch(error => {
+        logger.error(`一起聊消息处理异常 [${messageId}]:`, error);
+      });
+      return;
+    }
     
     // 群聊中的文本消息需要@机器人或包含关键词才响应
     // 但图片和视频消息在群聊中也会被处理
@@ -358,6 +371,7 @@ class MessageHandler {
     
     // 检查是否启用了一起聊功能（只检查当前群聊是否启用）
     if (isRoom && this.groupChatRooms.has(roomId)) {
+      // 一起聊模式下，只收集消息，不立即回复
       await this.handleGroupChatMessage(message);
       return;
     }
@@ -489,9 +503,9 @@ class MessageHandler {
     this.groupChatMessageCount++;
     
     // 记录日志
-    logger.room(await room.topic(), `一起聊模式 - ${userName}: ${text}`);
+    logger.room(await room.topic(), `一起聊模式 - ${userName}: ${text} (${this.groupChatMessageCount}/${config.groupChat.messageInterval})`);
     
-    // 每隔指定条数消息，机器人主动发言
+    // 每收集到指定条数消息后，机器人回复一次
     if (this.groupChatMessageCount >= config.groupChat.messageInterval) {
       await this.generateGroupChatResponse(message);
       this.groupChatMessageCount = 0; // 重置计数器
@@ -508,7 +522,7 @@ class MessageHandler {
       // 构建提示词
       const systemPrompt = {
         role: 'system',
-        content: '你是一个群聊助手，正在参与群聊讨论。请根据最近的聊天内容，自然地参与对话。你的回复应该：1. 与话题相关且有价值 2. 语气轻松友好 3. 不要太长，保持简洁 4. 可以提问、分享观点或给出建议。不需要@任何人。'
+        content: '你是一个群聊助手，正在参与群聊讨论。你会观察群友们的对话，每当积累了几条消息后再参与讨论。请根据最近的聊天内容，自然地参与对话。你的回复应该：1. 综合考虑最近几条消息的内容 2. 与话题相关且有价值 3. 语气轻松友好 4. 不要太长，保持简洁 5. 可以提问、分享观点或给出建议。不需要@任何人。'
       };
       
       const messages = [systemPrompt, ...this.groupChatContext];
@@ -560,16 +574,19 @@ class MessageHandler {
     if (config.features.tools) {
       help += `🔧 实用工具：\n`;
       help += `${prefix}工具 - 查看可用工具\n`;
-      help += `${prefix}t - 工具功能（简写）\n\n`;
+      help += `${prefix}t - 工具功能（简写）\n`;
+  
     }
     
     help += `🎉 一起聊功能（仅群聊）：\n`;
     help += `${prefix}一起聊 - 开启群聊共享上下文模式\n`;
-    help += `${prefix}停止一起聊 - 关闭一起聊功能\n\n`;
+    help += `${prefix}停止一起聊 - 关闭一起聊功能\n`;
+    help += `💡 机器人会观察群友对话，每3条消息回复一次\n\n`;
     
     help += `💬 直接对话：\n`;
     help += `直接发送消息即可与我对话\n`;
-    help += `群聊中@我或包含我的名字即可\n\n`;
+    help += `群聊中@我或包含我的名字即可\n`;
+
     
     help += `🔄 上下文管理：\n`;
     help += `机器人会记住最近10轮对话\n`;

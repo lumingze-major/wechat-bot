@@ -4,6 +4,7 @@ const logger = require('../utils/logger');
 const cache = require('../utils/cache');
 const { Cache } = require('../utils/cache');
 
+
 class DoubaoService {
   constructor() {
     this.apiKey = config.doubao.apiKey;
@@ -18,6 +19,8 @@ class DoubaoService {
       apiKey: this.apiKey,
       baseURL: this.baseUrl,
     });
+    
+
   }
 
   /**
@@ -142,10 +145,12 @@ class DoubaoService {
    * 智能对话
    */
   async chat(userMessage, context = [], options = {}) {
+    const systemPrompt = '你是一个友善、有趣、博学的微信机器人助手。请用简洁、自然的语言回复用户，保持对话的连贯性和趣味性。';
+    
     const messages = [
       {
         role: 'system',
-        content: '你是一个友善、有趣、博学的微信机器人助手。请用简洁、自然的语言回复用户，保持对话的连贯性和趣味性。'
+        content: systemPrompt
       },
       ...context,
       {

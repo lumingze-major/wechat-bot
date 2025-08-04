@@ -5,17 +5,20 @@ const { Cache } = require('../utils/cache');
 const logger = require('../utils/logger');
 const config = require('../config');
 
+
 /**
  * 工具服务
  */
 class ToolService {
   constructor(doubaoService) {
     this.doubaoService = doubaoService;
+
     this.stats = {
       weatherQueries: 0,
       translations: 0,
       calculations: 0,
-      timeQueries: 0
+      timeQueries: 0,
+
     };
   }
 
@@ -39,6 +42,7 @@ class ToolService {
           return await this.handleShortUrl(message, args[0]);
         case '二维码':
           return await this.handleQRCode(message, args.join(' '));
+
         default:
           await message.say('❓ 未知的工具命令');
       }
@@ -272,6 +276,8 @@ class ToolService {
       await message.say('❌ 二维码生成失败');
     }
   }
+
+
 
   /**
    * 获取统计信息

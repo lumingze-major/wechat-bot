@@ -11,6 +11,7 @@ class SchedulerService {
     this.bot = bot;
     this.doubaoService = doubaoService;
     this.tasks = new Map();
+    this.isStopped = false; // 添加停止状态标志
     this.stats = {
       tasksCreated: 0,
       tasksExecuted: 0,
@@ -451,6 +452,11 @@ class SchedulerService {
    * 停止所有任务
    */
   stopAll() {
+    if (this.isStopped) {
+      return; // 已经停止，避免重复执行
+    }
+    
+    this.isStopped = true;
     for (const [name, task] of this.tasks) {
       task.stop();
     }

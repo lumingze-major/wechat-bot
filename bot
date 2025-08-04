@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 微信机器人管理脚本
+# 使用方法: ./bot <command> [options]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROCESS_MANAGER="$SCRIPT_DIR/process-manager.js"
+
+# 检查Node.js是否安装
+if ! command -v node &> /dev/null; then
+    echo "❌ 错误: 未找到 Node.js，请先安装 Node.js"
+    exit 1
+fi
+
+# 检查进程管理器是否存在
+if [ ! -f "$PROCESS_MANAGER" ]; then
+    echo "❌ 错误: 未找到进程管理器文件 $PROCESS_MANAGER"
+    exit 1
+fi
+
+# 执行命令
+cd "$SCRIPT_DIR"
+node "$PROCESS_MANAGER" "$@"

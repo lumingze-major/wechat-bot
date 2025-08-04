@@ -1,0 +1,38 @@
+[Unit]
+Description=WeChat Bot Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/wechat-bot
+ExecStart=/usr/bin/node /home/ubuntu/wechat-bot/process-manager.js start --daemon
+ExecStop=/usr/bin/node /home/ubuntu/wechat-bot/process-manager.js stop
+ExecReload=/usr/bin/node /home/ubuntu/wechat-bot/process-manager.js restart --daemon
+PIDFile=/home/ubuntu/wechat-bot/bot.pid
+Restart=always
+RestartSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+TimeoutStartSec=60
+
+# 环境变量
+Environment=NODE_ENV=production
+Environment=PATH=/usr/bin:/usr/local/bin
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/wechat-bot
+
+# 日志设置
+StandardOutput=append:/home/ubuntu/wechat-bot/bot.log
+StandardError=append:/home/ubuntu/wechat-bot/bot.log
+
+[Install]
+WantedBy=multi-user.target
